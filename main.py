@@ -2,6 +2,7 @@
 
 import psutil
 import sys
+import random
 
 def print_color_text(text, color, check):
     if check == 0:
@@ -44,14 +45,36 @@ def get_info_process(pid):
 	except psutil.NoSuchProcess:
 		print("Process with PID no found")
 
+def print_bar(label, size, max_size):
+    scaled_size = int(size / max_size * 30)  # Scale to fit within 30 characters
+    bar = "#" * scaled_size
+    print(f"{label}: {bar}")
+
+
 if __name__ == "__main__":
 	print_logo()
-	pid = input("Enter the pid of the process you wanna monitor :")
-	stack, heap, text, data = get_info_process(int(pid))
-	print(f"Memory usage for PID {pid}:")
-	print(f"Stack: {stack} bytes")
-	print(f"Heap: {heap} bytes")
-	print(f"Text: {text} bytes")
-	print(f"Data: {data} bytes")
-
-
+	while True:
+		try:
+			pid = input("Enter the pid of the process you wanna monitor :")
+			if pid.lower() == "exit":
+				print("\033[31mExiting ... \033[0m")
+				break
+			stack, heap, text, data = get_info_process(int(pid))
+			labels = ['stack', 'heap', 'text', 'data']
+			sizes = {stack, heap, text, data}
+			print("Process Memory distribution :")
+			max_size = max(sizes)
+			for lable, size in zip(labels, sizes):
+				print_bar(lable, size, max_size)
+			
+			# print(f"Memory usage for PID {pid}:")
+			# print(f"Stack: {stack} bytes")
+			# print(f"Heap: {heap} bytes")
+			# print(f"Text: {text} bytes")
+			# print(f"Data: {data} bytes")
+		except KeyboardInterrupt:
+			print("")
+			pass
+		except EOFError:
+			print("\033[31m\nExiting by Ctrl-D ... \033[0m")
+			break
