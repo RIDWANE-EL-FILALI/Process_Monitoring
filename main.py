@@ -2,7 +2,8 @@
 
 import psutil
 import sys
-import random
+from tabulate import tabulate
+
 
 def print_color_text(text, color, check):
     if check == 0:
@@ -32,6 +33,7 @@ def print_logo():
     print_color_text("╚═════════════════════════════════════════════════╝", 30, 1)
 
 def get_info_process(pid):
+	process = None
 	try:
 		process = psutil.Process(int(pid))
 		mem_info = process.memory_info()
@@ -43,35 +45,34 @@ def get_info_process(pid):
 		return stack_size, heap_size, text_size, data_size
 
 	except psutil.NoSuchProcess:
-		print("Process with PID no found")
-
-def print_bar(label, size, max_size):
-    scaled_size = int(size / max_size * 30)  # Scale to fit within 30 characters
-    bar = "#" * scaled_size
-    print(f"{label}: {bar}")
+		print("\033[31mProcess with PID not found\033[0m")
+		return 0, 0, 0, 0
 
 
 if __name__ == "__main__":
 	print_logo()
 	while True:
 		try:
-			pid = input("Enter the pid of the process you wanna monitor :")
+			pid = input("Enter the pid of the process you wanna monitor (type 'exit' to quit) :")
 			if pid.lower() == "exit":
 				print("\033[31mExiting ... \033[0m")
 				break
 			stack, heap, text, data = get_info_process(int(pid))
+			if stack == 0 or heap == 0 or text == 0 or data == 0:
+				continue
 			labels = ['stack', 'heap', 'text', 'data']
 			sizes = {stack, heap, text, data}
-			print("Process Memory distribution :")
-			max_size = max(sizes)
-			for lable, size in zip(labels, sizes):
-				print_bar(lable, size, max_size)
-			
-			# print(f"Memory usage for PID {pid}:")
-			# print(f"Stack: {stack} bytes")
-			# print(f"Heap: {heap} bytes")
-			# print(f"Text: {text} bytes")
-			# print(f"Data: {data} bytes")
+			data = [
+				["\033[1;31mStack\033[0m", stack],
+				["\033[1;31mHeap\033[0m", heap],
+				["\033[1;31mText\033[0m", text],
+				["\033[1;31mData\033[0m", data]
+				]
+			headers = ["\033[1;33mMemory Segment\033[0m", "\033[1;33mUsage (bytes)\033[0m"]
+			table = tabulate(data, headers, tablefmt="grid")
+			print(table)
+		except ValueError:
+			print("\033[31mInvalid input. Please enter a valid integer PID or 'exit' to quit. \033[0m")
 		except KeyboardInterrupt:
 			print("")
 			pass
