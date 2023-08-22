@@ -53,12 +53,12 @@ if __name__ == "__main__":
 	print_logo()
 	while True:
 		try:
-			pid = input("Enter the pid of the process you wanna monitor (type 'exit' to quit) :")
+			pid = input("\033[1;4;32mEnter the pid of the process you wanna monitor (type 'exit' to quit) :\033[0m")
 			if pid.lower() == "exit":
 				print("\033[31mExiting ... \033[0m")
 				break
 			stack, heap, text, data = get_info_process(int(pid))
-			if stack == 0 or heap == 0 or text == 0 or data == 0:
+			if stack == 0 and heap == 0 and text == 0 and data == 0:
 				continue
 			labels = ['stack', 'heap', 'text', 'data']
 			sizes = {stack, heap, text, data}
